@@ -1,0 +1,2 @@
+<*.{byte,native,.top}>: g++, use_llvm, use_llvm_analysis, use_llvm_bitwriter, use_llvm_executionengine
+true: warn_Z, debug
