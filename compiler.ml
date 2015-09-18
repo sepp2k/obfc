@@ -117,7 +117,7 @@ let compile app =
     compile_statements IntMap.empty initial_tape_ptr main_begin_builder main_block app
   in
   ignore (build_ret zero32 main_end_builder);
-  the_module, main_fun
+  the_module
 
 let compile_file file =
   let code = Utils.read_file file in
