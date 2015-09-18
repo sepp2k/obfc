@@ -1,18 +1,12 @@
-open Llvm_executionengine;;
-
-let opt = 2 in
-let my_module, main = Compiler.compile_file Sys.argv.(1) in
-let ee =
-  (* Apparently initialize_native_target returns *false* when there is a native target
-     and true when there isn't *)
-  if not (initialize_native_target ()) then
-    ExecutionEngine.create_jit my_module opt
-  else
-    begin
-      prerr_endline "Could not initialize native target for JIT, using interpreter";
-      ExecutionEngine.create my_module
-    end
+let module EE = Llvm_executionengine in
+let options =
+  { EE.default_compiler_options with
+    EE.opt_level = 3
+  }
 in
-ExecutionEngine.run_static_ctors ee;
-ignore (ExecutionEngine.run_function main [||] ee);
-ExecutionEngine.dispose ee
+let my_module, _ = Compiler.compile_file Sys.argv.(1) in
+let ee = EE.create ?options:(Some options) my_module in
+EE.run_static_ctors ee;
+let main_ctype = Foreign.funptr (Ctypes.(void @-> returning void)) in
+ignore (EE.get_function_address "main" main_ctype ee ());
+EE.dispose ee
