@@ -10,7 +10,7 @@ program.
 
 Dependencies
 ------------
-* Ocaml
+* Ocaml 4.02.0 or newer
 * LLVM 3.6 with Ocaml bindings
 * ocaml-ctypes
 

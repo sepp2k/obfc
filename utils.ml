@@ -1,7 +1,7 @@
 let read_file file =
   let chan = open_in_bin file in
   let len = in_channel_length chan in
-  let buf = String.create len in
+  let buf = Bytes.create len in
   really_input chan buf 0 len;
   buf
 
