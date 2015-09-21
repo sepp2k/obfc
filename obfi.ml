@@ -5,6 +5,7 @@ let options =
   }
 in
 let my_module = Compiler.compile_file Sys.argv.(1) in
+Llvm_all_backends.initialize ();
 let ee = EE.create ?options:(Some options) my_module in
 EE.run_static_ctors ee;
 let main_ctype = Foreign.funptr (Ctypes.(void @-> returning void)) in
