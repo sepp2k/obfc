@@ -11,7 +11,7 @@ program.
 Dependencies
 ------------
 * Ocaml 4.02.0 or newer
-* LLVM 3.6 with Ocaml bindings
+* LLVM 3.6 or later with Ocaml bindings
 * ocaml-ctypes
 
 Compilation
