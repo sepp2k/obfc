@@ -1,2 +1,2 @@
-let my_module = Compiler.compile_file Sys.argv.(1) in
-ignore (Llvm_bitwriter.write_bitcode_file my_module (Sys.argv.(1) ^ "c"))
+let my_module = Compiler.compile_file Sys.argv.(1)
+let _ = Llvm_bitwriter.write_bitcode_file my_module (Utils.result_path Sys.argv.(1) "bc")

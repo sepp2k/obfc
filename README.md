@@ -23,18 +23,10 @@ Usage
 -----
 
 To compile a program to LLVM bitcode (which can then be converted to native
-code using llc or run directly using lli)¹:
+code using llc or run directly using lli):
 
-    ./obfc.native the-brainfuck-code.b
+    ./obfc.native the-brainfuck-code.bf
 
 To directly execute a Brainfuck file (using LLVM's JIT functionality):
 
-    ./obfi.native the-brainfuck-code.b
-
-Footnotes
----------
-
-¹ Note that the generated bitcode file's name will be the name of the Brainfuck
-file with a "c" appended at the end. This will have the desired effect of the
-bitcode file ending in ".bc" if and only if the Brainfuck file ended in ".b".
-I'm aware that this way of determining the file name is less than ideal.
+    ./obfi.native the-brainfuck-code.bf
