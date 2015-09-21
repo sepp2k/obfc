@@ -1,1 +1,1 @@
-true: g++, package(llvm), package(llvm.executionengine), package(llvm.bitwriter), package(ctypes), package(ctypes.foreign)
+true: g++, package(llvm), package(llvm.executionengine), package(llvm.bitwriter), package(llvm.all_backends), package(ctypes), package(ctypes.foreign)

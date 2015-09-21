@@ -12,6 +12,7 @@ Dependencies
 ------------
 * Ocaml 4.02.0 or newer
 * LLVM 3.6 or later with Ocaml bindings
+* A C compiler accessible as `cc` (to link executables)
 * ocaml-ctypes
 
 Compilation
@@ -22,10 +23,11 @@ Compilation
 Usage
 -----
 
-To compile a program to LLVM bitcode (which can then be converted to native
-code using llc or run directly using lli):
+To compile a program:
 
-    ./obfc.native the-brainfuck-code.bf
+    ./obfc.native the-brainfuck-code.bf -o name-of-the-executable
+
+The options -emit-llvm, -c and -S can be added as desired to produce LLVM (with -emit-llvm) or native (without -emit-llvm) object files (-c) or assembly files (-S).
 
 To directly execute a Brainfuck file (using LLVM's JIT functionality):
 

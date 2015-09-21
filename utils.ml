@@ -9,8 +9,8 @@ let print_ints ints =
   List.iter (Printf.printf "%d,") ints;
   print_newline ()
 
-(** Given the path of a Brainfuck file and the extension for the result,
-    returns the path of the result file that will be generated.
+(** Given the path of a Brainfuck file and the extension (including the '.') for
+    the result, returns the path of the result file that will be generated.
     If the source file has an extension, the extension will be replaced by
     the result extension. Otherwise the result extension will be simply appended
     to the file name.
@@ -26,7 +26,7 @@ let result_path source_path result_extension =
     then Filename.chop_extension source_name
     else source_name
   in
-  Printf.sprintf "%s%s%s.%s" dirname Filename.dir_sep name result_extension
+  String.concat "" [dirname; Filename.dir_sep; name; result_extension]
 
 module IntCompare = struct
   let compare = Pervasives.compare
