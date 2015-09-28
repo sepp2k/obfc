@@ -2,10 +2,7 @@ open Llvm
 open Low_level_tree
 open Utils
 
-(* If true, prints values as numbers rather than characters for debugging purposes *)
-let numeric_output = false
-
-let compile app =
+let compile ~numeric_output app =
   let context = global_context () in
   let the_module = create_module context "bf_program" in
   let i32 = i32_type context in
@@ -35,7 +32,7 @@ let compile app =
   in
 
   let read_value builder = build_call getchar [||] "read_char" builder in
-  
+
   let compile_value value values = match value with
     | Const x -> const_int value_type x
     | Memory offset -> IntMap.find offset values
@@ -119,10 +116,35 @@ let compile app =
   ignore (build_ret zero32 main_end_builder);
   the_module
 
-let compile_file file =
+type options = {
+    (* Print the tree after various translation phases *)
+    print_after_lltree: bool;
+    print_after_zero_opt: bool;
+    print_after_const_fold: bool;
+    (* If true, prints values as numbers rather than characters for debugging purposes *)
+    numeric_output: bool
+  }
+
+let default_options = {
+    print_after_lltree = false;
+    print_after_zero_opt = false;
+    print_after_const_fold = false;
+    numeric_output = false
+  }
+
+let compile_file file options =
   let code = Utils.read_file file in
   let app = Parser.parse code in
   let app = Low_level_tree.transform app in
+  if options.print_after_lltree
+  then Low_level_tree_printer.print "Unoptimized LLTree" app
+  else ();
   let app = Zero_optimizer.optimize app in
+  if options.print_after_zero_opt
+  then Low_level_tree_printer.print "Zero-optimized LLTree" app
+  else ();
   let app = Constant_folding.optimize app in
-  compile app
+  if options.print_after_const_fold
+  then Low_level_tree_printer.print "Constant-folded LLTree" app
+  else ();
+  compile ~numeric_output:options.numeric_output app

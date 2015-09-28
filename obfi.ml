@@ -4,7 +4,7 @@ let options =
     EE.opt_level = 3
   }
 in
-let my_module = Compiler.compile_file Sys.argv.(1) in
+let my_module = Compiler.compile_file Sys.argv.(1) Compiler.default_options in
 Llvm_all_backends.initialize ();
 let ee = EE.create ?options:(Some options) my_module in
 EE.run_static_ctors ee;

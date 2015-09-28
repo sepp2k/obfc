@@ -21,18 +21,50 @@ let outfile_arg: string option ref = ref None
 let infile_arg: string option ref = ref None
 let llvm_or_native = ref Native
 let result_type = ref Executable
+let compiler_options = ref Compiler.default_options
 
-let set_result_type t () =
-  if !result_type <> Executable
-  then raise (Arg.Bad "-S and -c can't be used in combination or more than once.")
-  else result_type := t
+let set_option f =
+  Arg.Unit (fun () -> compiler_options := f !compiler_options)
+
+let set_result_type t =
+  Arg.Unit (fun () ->
+    if !result_type <> Executable
+    then raise (Arg.Bad "-S and -c can't be used in combination or more than once.")
+    else result_type := t)
 
 let args =
   Arg.align [
-      "-o", Arg.String (fun f -> outfile_arg := Some f), "outfile The name of generated bitcode file. If this option is not used, the name of the generated file will be that of the  source file with its extension changed to '.bc', '.ll', '.o', '.s' or nothing when emitting LLVM object code, LLVM assembly code, native object code, native assembly code or native executable respectively.";
-      "-emit-llvm", Arg.Unit (fun () -> llvm_or_native := Llvm), " Emit LLVM bitcode (with -c) or assembly (with -S). Can't be used without -S or -c.";
-      "-S", Arg.Unit (set_result_type Assembly), " Emit assembly code instead of an executable.";
-      "-c", Arg.Unit (set_result_type Object), " Emit object file instead of an executable.";
+      "-o",
+      Arg.String (fun f -> outfile_arg := Some f),
+      "outfile The name of generated bitcode file. If this option is not used, the name of the generated file will be that of the  source file with its extension changed to '.bc', '.ll', '.o', '.s' or nothing when emitting LLVM object code, LLVM assembly code, native object code, native assembly code or native executable respectively.";
+
+      "-emit-llvm",
+      Arg.Unit (fun () -> llvm_or_native := Llvm),
+      " Emit LLVM bitcode (with -c) or assembly (with -S). Can't be used without -S or -c.";
+
+      "-S",
+      set_result_type Assembly,
+      " Emit assembly code instead of an executable.";
+
+      "-c",
+      set_result_type Object,
+      " Emit object file instead of an executable.";
+
+      "-numeric-output",
+      set_option (fun opts -> { opts with Compiler.numeric_output = true }),
+      " Make '.' print the current value as a number rather than a character (makes it easier to see what's going on when the output contains non-printable characters in buggy programs).";
+
+      "-print-after-lltree",
+      set_option (fun opts -> { opts with Compiler.print_after_lltree = true }),
+      " (debug) Print the low level tree after it has been generated. This is only useful for debugging the compiler.";
+
+      "-print-after-zero-opt",
+      set_option (fun opts -> { opts with Compiler.print_after_zero_opt = true }),
+      " (debug) Print the low level tree after the zero optimization phase. This is only useful for debugging the compiler.";
+
+      "-print-after-const-fold",
+      set_option (fun opts -> { opts with Compiler.print_after_const_fold = true }),
+      " (debug) Print the low level tree after constant folding. This is only useful for debugging the compiler.";
     ]
 
 let usage = Printf.sprintf "%s [options] brainfuck-file.bf" Sys.executable_name
@@ -76,7 +108,7 @@ let llvm_target_machine () =
   let triple = Target.default_triple () in
   TargetMachine.create triple (Target.by_triple triple)
 
-let my_module = Compiler.compile_file infile
+let my_module = Compiler.compile_file infile !compiler_options
 let () =
   match !llvm_or_native, !result_type with
   | Llvm, Object ->

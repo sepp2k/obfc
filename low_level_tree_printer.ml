@@ -18,4 +18,7 @@ let rec string_of_statement = function
 and string_of_statements statements =
   String.concat "" (List.map string_of_statement statements)
 
-let print statements = print_string (string_of_statements statements)
+let print title statements =
+  print_endline title;
+  print_string (string_of_statements statements);
+  print_newline ()
