@@ -37,25 +37,24 @@ let realize_all memory = List.concat (List.map (realize memory) (IntMap.keys mem
 let rec optimize memory = function
   | [] -> realize_all memory
   | Add (offset, value) :: rest ->
-    let memory = match get_value memory value with
-      | `Const x ->
-        let new_value =
-          if IntMap.mem offset memory then
-            add x (IntMap.find offset memory)
-          else
-            ConstIncrease x
-        in
-        IntMap.add offset new_value memory
-      | `Variable offset2 ->
+    (match get_value memory value with
+    | `Const x ->
+      let new_value =
         if IntMap.mem offset memory then
-          match IntMap.find offset memory with
-            | ConstValue x ->
-              IntMap.add offset (IncreasedVariable (offset2, x)) memory
-            | _ -> memory
+          add x (IntMap.find offset memory)
         else
-          memory
-    in
-    optimize memory rest
+          ConstIncrease x
+      in
+      optimize (IntMap.add offset new_value memory) rest
+    | `Variable offset2 ->
+      if IntMap.mem offset memory then
+        match IntMap.find offset memory with
+        | ConstValue x ->
+          optimize (IntMap.add offset (IncreasedVariable (offset2, x)) memory) rest
+        | _ ->
+          realize memory offset @ (Add (offset, value) :: optimize memory rest)
+      else
+        Add (offset, value) :: optimize memory rest)
   | Set (offset, Memory offset2) :: rest ->
     optimize (IntMap.add offset (IncreasedVariable (offset2, 0)) memory) rest
   | Set (offset, Const x) :: rest ->
@@ -66,7 +65,7 @@ let rec optimize memory = function
       (match get_value memory (Memory offset) with
         | `Const x -> Output (Const x) :: optimize memory rest
         | `Variable offset2 ->
-          realize memory offset2 @ Output (Memory offset2) :: optimize memory rest)
+          realize memory offset2 @ Output (Memory offset2) :: optimize IntMap.empty rest)
   | Store :: rest ->
     let instructions = realize_all memory in
     instructions @ Store :: optimize IntMap.empty rest
